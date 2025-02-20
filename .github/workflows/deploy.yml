@@ -1,0 +1,37 @@
+name: Deploy to Web Server
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Deploy to Server
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        source: "."
+        target: "/home/auronfy1/idm.auronfy.com/"
+        
+    - name: Execute Commands
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        port: ${{ secrets.PORT }}
+        script: |
+          cd /home/auronfy1/idm.auronfy.com/
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          touch tmp/restart.txt
+          git config --global user.email "auronloltr@gmail.com"
+          git config --global user.name "auronserap"
